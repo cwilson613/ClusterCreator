@@ -78,159 +78,52 @@ variable "clusters" {
     }))
   }))
   default = { # create your clusters here using the above object
-    "alpha" = {
-      cluster_name             = "alpha"
+    "vanderlyn" = {
+      cluster_name             = "vanderlyn"
       cluster_id               = 1
-      kubeconfig_file_name     = "alpha.yml"
-      start_on_proxmox_boot    = false
+      kubeconfig_file_name     = "vanderlyn.kubeconfig"
+      start_on_proxmox_boot    = true
       ssh = {
-        ssh_user               = "line6"
+        ssh_user               = "styrene"
       }
       networking = {
         ipv4 = {
-          subnet_prefix        = "10.0.1"
-          gateway              = "10.0.1.1"
-          management_cidrs     = "10.0.0.0/30,10.0.60.2,10.0.50.5,10.0.50.6"
-          lb_cidrs             = "10.0.1.200/29,10.0.1.208/28,10.0.1.224/28,10.0.1.240/29,10.0.1.248/30,10.0.1.252/31"
+          subnet_prefix        = "10.8.0"
+          gateway              = "10.8.0.1"
+          management_cidrs     = "10.8.0.0/8"
+          lb_cidrs             = "10.8.0.201/32,10.8.0.202/31,10.8.0.204/30,10.8.0.208/31"
         }
         ipv6 = {}
         kube_vip = {
-          vip                  = "10.0.1.100"
-          vip_hostname         = "alpha-api-server"
+          vip                  = "10.8.0.200"
+          vip_hostname         = "vanderlyn-api-server"
         }
       }
       node_classes = {
         controlplane = {
-          count      = 1
-          cores      = 16
+          count      = 3
+          cores      = 4
+          memory     = 8192
+          disks      = [
+            { datastore = "local-lvm", size = 100 }
+          ]
+          start_ip   = 230
+          pve_nodes  = ["pve"]
+          labels = [
+            "nodeclass=controlplane"
+          ]
+        },
+        general = {
+          count      = 4
+          cores      = 8
           memory     = 16384
           disks      = [
-            { datastore = "local-btrfs", size = 100 }
+            { datastore = "local-lvm", size = 20 }
           ]
-          start_ip   = 110
-          labels = [
-            "nodeclass=controlplane"
-          ]
-        }
-      }
-    }
-    "beta" = {
-      cluster_name             = "beta"
-      cluster_id               = 2
-      kubeconfig_file_name     = "beta.yml"
-      start_on_proxmox_boot    = false
-      ssh = {
-        ssh_user               = "line6"
-      }
-      networking = {
-        ipv4 = {
-          subnet_prefix        = "10.0.2"
-          gateway              = "10.0.2.1"
-          management_cidrs     = "10.0.0.0/30,10.0.60.2,10.0.50.5,10.0.50.6"
-          lb_cidrs             = "10.0.2.200/29,10.0.2.208/28,10.0.2.224/28,10.0.2.240/29,10.0.2.248/30,10.0.2.252/31"
-        }
-        ipv6 = {}
-        kube_vip = {
-          vip                  = "10.0.2.100"
-          vip_hostname         = "beta-api-server"
-        }
-      }
-      node_classes = {
-        controlplane = {
-          count      = 1
-          cores      = 4
-          memory     = 4096
-          disks      = [
-            { datastore = "local-btrfs", size = 20 }
-          ]
-          start_ip   = 110
-          labels = [
-            "nodeclass=controlplane"
-          ]
-        }
-        general = {
-          count      = 2
-          cores      = 8
-          memory     = 4096
-          disks      = [
-            { datastore = "local-btrfs", size = 20 }
-          ]
-          start_ip   = 130
+          start_ip   = 233
+          pve_nodes  = ["pve"]
           labels = [
             "nodeclass=general"
-          ]
-        }
-      }
-    }
-    "gamma" = {
-      cluster_name             = "gamma"
-      cluster_id               = 3
-      kubeconfig_file_name     = "gamma.yml"
-      start_on_proxmox_boot    = false
-      ssh = {
-        ssh_user               = "line6"
-      }
-      networking = {
-        ipv4 = {
-          subnet_prefix        = "10.0.3"
-          gateway              = "10.0.3.1"
-          management_cidrs     = "10.0.0.0/30,10.0.60.2,10.0.50.5,10.0.50.6"
-          lb_cidrs             = "10.0.3.200/29,10.0.3.208/28,10.0.3.224/28,10.0.3.240/29,10.0.3.248/30,10.0.3.252/31"
-        }
-        ipv6 = {}
-        kube_vip = {
-          vip                  = "10.0.3.100"
-          vip_hostname         = "gamma-api-server"
-        }
-      }
-      node_classes = {
-        controlplane = {
-          count     = 3
-          cores     = 4
-          memory    = 4096
-          disks     = [
-            { datastore = "local-btrfs", size = 20 }
-          ]
-          start_ip = 110
-          labels   = [
-            "nodeclass=controlplane"
-          ]
-        }
-        etcd = {
-          count     = 3
-          disks     = [
-            { datastore = "local-btrfs", size = 20 }
-          ]
-          start_ip = 120
-        }
-        general = {
-          count     = 5
-          cores     = 8
-          memory    = 4096
-          disks     = [
-            { datastore = "local-btrfs", size = 20 }
-          ]
-          start_ip = 130
-          labels   = [
-            "nodeclass=general"
-          ]
-        }
-        gpu = {
-          count      = 2
-          pve_nodes  = [ "Acropolis", "Parthenon" ]
-          cpu_type   = "host"
-          disks      = [
-            { datastore = "local-btrfs", size = 20 }
-          ]
-          start_ip   = 190
-          labels = [
-            "nodeclass=gpu"
-          ]
-          taints  = [
-            "gpu=true:NoSchedule"
-          ]
-          devices = [
-            { mapping = "my-full-gpu-passthrough" }
           ]
         }
       }
